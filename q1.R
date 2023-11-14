@@ -29,6 +29,9 @@ predict(mlr_reduced, newdata = test_reduced_data)
 test_reduced_temp_data <- data.frame(x1=15000, x2=3, x4_1=0)
 predict(mlr_reduced, newdata = test_reduced_temp_data)
 
+# ==========================================================
+# redundant stuff
+
 # investigate linear regression of x3 and y
 mlr_x3 <- lm(y ~x3, data=data)
 summary(mlr_x3)
