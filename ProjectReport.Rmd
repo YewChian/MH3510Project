@@ -5,7 +5,7 @@ output:
   html_notebook: default
 ---
 
-Done by Keerthana (?), Nicholas Yap (U2020269C), Peh Wei Hang (?) and Kng Yew Chian (?)
+Done by Keerthana (?), Nicholas Yap (U2020269C), Peh Wei Hang (U2022903K) and Kng Yew Chian (?)
 
 # Importing the Dataset
 
@@ -89,6 +89,11 @@ As the t-test for $X_3$ is not significant, we try removing it and forming anoth
 
 ```{r}
 mlr_model_2 <- lm(Y~X1+X2+X4, data=aadt)
+anova(mlr_model_2, mlr_model_1)
+```
+As $Pr(>F) = 0.4213$ which is non-significant, we cannot reject the null hypothesis of $H_0: \Beta_{X3} = 0$. As such, Model `mlr_model_1` is rejected.
+
+```{r}
 summary(mlr_model_2)
 ```
 
