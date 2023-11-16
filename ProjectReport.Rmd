@@ -1,0 +1,149 @@
+---
+title: "MH4518 Project"
+output:
+  pdf_document: default
+  html_notebook: default
+---
+
+Done by Keerthana (?), Nicholas Yap (U2020269C), Peh Wei Hang (?) and Kng Yew Chian (?)
+
+# Importing the Dataset
+
+The dataset we are using in this project is the average annual daily traffic dataset, given in a file named `aadt.txt`.
+
+In this project, we aim to predict the average no. of vehicles passing through a particular section of the road each day (Y), using the following predictor variables:
+
+-   Population of county in which road section is located (X1)
+
+-   No. of lanes in road section (X2)
+
+-   Width of road section (X3)
+
+-   Whether there is control of access to the section, a 2-category variable (X4)
+
+We first import the dataset below:
+
+```{r}
+data <- readLines("aadt.txt")
+data <- gsub("\\s+", " ", data) # replace spaces with a single space
+con <- textConnection(data)
+aadt <- read.table(con, header=F)
+close(con)
+colnames(aadt) = c("Y", "X1", "X2", "X3", "X4", "X5", "X6", "X7")
+
+data_raw <- read.table("aadt.txt", header=FALSE)
+aadt <- data.frame(y=data_raw$V1,x1=data_raw$V2,x2=data_raw$V3,x3=data_raw$V4,x4=data_raw$V5)
+colnames(aadt) = c("Y", "X1", "X2", "X3", "X4")
+```
+
+# Investigating response/predictor relationships
+
+We first investigate the individual linear relationships between $Y$ and $X_1$ / $X_2$ / $X_3$ / $X_4$, as they are our primary variables of interest.
+
+```{r, fig.height=7, fig.width=9}
+plot(aadt[c("Y", "X1", "X2", "X3", "X4")])
+```
+
+We see a slight indication of a positive linear relationship between $X_1$ and $Y$, as well as $X_2$ and $Y$, but we are unable to tell whether a linear relationship exists between $X_3$ / $X_4$ and $Y$.
+
+For the predictor variables ($X_1$ , $X_2$, $X_3$, $X_4$), we also do not see any strong indication of relationships among them.
+
+# Fitting SLR models
+
+We attempt to fit SLR models to each of the predictor variables to examine their individual relationships with Y.
+
+```{r}
+slr_x1 = lm(Y~X1, data=aadt)
+summary(slr_x1)
+```
+
+```{r}
+slr_x2 = lm(Y~X2, data=aadt)
+summary(slr_x2)
+```
+
+```{r}
+slr_x3 = lm(Y~X3, data=aadt)
+summary(slr_x3)
+```
+
+```{r}
+slr_x4 = lm(Y~X4, data=aadt)
+summary(slr_x4)
+```
+
+From the above t-test results, we see that $X_1$, $X_2$, and $X_4$ individually have very significant linear relationships with $Y$, while $X_3$ does not.
+
+# Fitting a MLR model
+
+Here, we fit a MLR model to regress $Y$ on $X_1$, $X_2$, $X_3$ and $X_4$.
+
+```{r}
+mlr_model_1 <- lm(Y~X1+X2+X3+X4, data=aadt)
+summary(mlr_model_1)
+```
+
+As $F = 88.29 > F^{0.05}_{4,116}=3.006917$, the correlation between our MLR model and $Y$ is significant. Next, we look at goodness-of-fit of the model. Since $0.6<R_{adjusted}=0.7442<0.95$, we conclude that the MLR model is a good fit, and is able to explain 74.42% of variance in the response variable.
+
+As the t-test for $X_3$ is not significant, we try removing it and forming another MLR model with only $X_1$, $X_2$ and $X_4$ as the predictors.
+
+```{r}
+mlr_model_2 <- lm(Y~X1+X2+X4, data=aadt)
+summary(mlr_model_2)
+```
+
+As $F = 117.8 > F^{0.05}_{3,117}=2.682132$, the correlation between our MLR model and $Y$ is also significant. As $R^2_{adjusted} = 0.745 > 0.7442$, this model is a slightly better fit than the earlier model.
+
+## Transformations of Variables
+
+We next perform transformations for $X_1$ and $X_3$. We exclude $X_2$ as it represents the number of lanes with 5 discrete values from 2 to 8, which we treat as a categorical variable. We exclude $X_4$ as it is a categorical variable as well.
+
+We first perform log-transformations and plot a scatterplot between $Y$ and the log-transformed variables.
+
+```{r}
+aadt$X1_log <- log(aadt$X1)
+aadt$X3_log <- log(aadt$X3)
+plot(aadt[c("Y", "X1_log", "X3_log")])
+```
+
+From the above scatterplot, we see that $Y$ and $X_1$ seem to have a linear relationship, but we are unable to conclude that for $Y$ and $X_3$.
+
+We next perform square transformation of $Y$, $X_1^2$, and $X_3^2$, and plot a scatterplot between them.
+
+```{r}
+aadt$X1_squared <- aadt$X1^2
+aadt$X3_squared <- aadt$X3^2
+plot(aadt[c("Y", "X1_squared", "X3_squared")])
+```
+
+We see that majority of the values for both $X_1^2$ and $X_3^2$ are clustered towards the left, which does not look desirable.
+
+We next try to form a model using $log(X_1)$, $X_2$ and $X_4$ as predictors for $Y$.
+
+```{r}
+mlr_model_3 <- lm(Y~X1_log+X2+X4, data=aadt)
+summary(mlr_model_3)
+```
+
+This model does not perform as well, as its $R^2_{adjusted} = 0.693$ which is significantly lower than the first two models.
+
+We then try to fit a model using $X_1$, $X_2$, $log(X_3)$ and $X_4$ next.
+
+```{r}
+mlr_model_4 <- lm(Y~X1+X2+X3_log+X4, data=aadt)
+summary(mlr_model_4)
+```
+
+This model has $R^2_{adjusted} = 0.7451$, which is the highest among all the models.
+
+## Prediction
+
+Lastly, we try to predict $Y$ given $X_1 = 50000, X_2=3, X_3=60, X_4=2$ on all the models.
+
+```{r}
+new_data = data.frame(X1=50000, X1_log=log(50000), X2=3, X3=60, X3_log=log(60), X4=2)
+predict(mlr_model_1, new_data)
+predict(mlr_model_2, new_data)
+predict(mlr_model_3, new_data)
+predict(mlr_model_4, new_data)
+```
