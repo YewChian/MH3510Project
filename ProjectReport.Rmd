@@ -89,17 +89,12 @@ As the t-test for $X_3$ is not significant, we try removing it and forming anoth
 
 ```{r}
 mlr_model_2 <- lm(Y~X1+X2+X4, data=aadt)
-anova(mlr_model_2, mlr_model_1)
-```
-As $Pr(>F) = 0.4213$ which is non-significant, we cannot reject the null hypothesis of $H_0: \Beta_{X3} = 0$. As such, Model `mlr_model_1` is rejected.
-
-```{r}
 summary(mlr_model_2)
 ```
 
 As $F = 117.8 > F^{0.05}_{3,117}=2.682132$, the correlation between our MLR model and $Y$ is also significant. As $R^2_{adjusted} = 0.745 > 0.7442$, this model is a slightly better fit than the earlier model.
 
-## Transformations of Variables
+# Transformations of Variables
 
 We next perform transformations for $X_1$ and $X_3$. We exclude $X_2$ as it represents the number of lanes with 5 discrete values from 2 to 8, which we treat as a categorical variable. We exclude $X_4$ as it is a categorical variable as well.
 
@@ -141,7 +136,30 @@ summary(mlr_model_4)
 
 This model has $R^2_{adjusted} = 0.7451$, which is the highest among all the models.
 
-## Prediction
+# Comparing Models with ANOVA
+
+From above, we have 4 MLR models using the following predictor variables:
+
+1.  $X_1$, $X_2$, $X_3$, $X_4$
+2.  $X_1$, $X_2$, $X_4$
+3.  $log(X_1)$, $X_2$, $X_4$
+4.  $X_1$, $X_2$, $log(X_3)$, $X_4$
+
+As model 2 is a reduced model of model 1 and model 4, we run an ANOVA between model 2 and 1, and between model 2 and 4.
+
+```{r}
+anova(mlr_model_1, mlr_model_2)
+```
+
+As $Pr(>F) = 0.4213$ which is non-significant, we conclude that model 1 does not lead to a significant improvement over model 2.
+
+```{r}
+anova(mlr_model_4, mlr_model_2)
+```
+
+Similarly, as $Pr(>F) = 0.3025$ which is non-significant, we conclude that model 4 does not lead to a significant improvement over model 2.
+
+# Prediction
 
 Lastly, we try to predict $Y$ given $X_1 = 50000, X_2=3, X_3=60, X_4=2$ on all the models.
 
