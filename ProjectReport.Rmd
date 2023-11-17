@@ -151,13 +151,13 @@ As model 2 is a reduced model of model 1 and model 4, we run an ANOVA between mo
 anova(mlr_model_1, mlr_model_2)
 ```
 
-As $Pr(>F) = 0.4213$ which is non-significant, we conclude that model 1 does not lead to a significant improvement over model 2.
+As $Pr(>F) = 0.4213$, it is not small enough to justify inclusion of the variable $X3$ 
 
 ```{r}
 anova(mlr_model_4, mlr_model_2)
 ```
 
-Similarly, as $Pr(>F) = 0.3025$ which is non-significant, we conclude that model 4 does not lead to a significant improvement over model 2.
+Similarly, as $Pr(>F) = 0.3025$, it is not small enough to justify inclusion of the variable $log(X3)$ 
 
 # Prediction
 
