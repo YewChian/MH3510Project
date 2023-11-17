@@ -5,7 +5,7 @@ output:
   html_notebook: default
 ---
 
-Done by Keerthana (?), Nicholas Yap (U2020269C), Peh Wei Hang (U2022903K) and Kng Yew Chian (?)
+Done by Keerthana (?), Nicholas Yap (U2020269C), Peh Wei Hang (U2022903K) and Kng Yew Chian (U2021777G)
 
 # Importing the Dataset
 
